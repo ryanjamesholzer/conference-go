@@ -13,6 +13,12 @@ class PresentationDetailEncoder(ModelEncoder):
         "created",
     ]
 
+    def get_extra_data(self, o):
+        return {
+            "conference": o.conference.name,
+            "status": o.status.name,
+        }
+
 
 class PresentationListEncoder(ModelEncoder):
     model = Presentation
