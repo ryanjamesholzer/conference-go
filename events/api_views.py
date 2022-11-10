@@ -8,7 +8,7 @@ from .encoders import (
     LocationDetailEncoder,
 )
 import json
-from .acl import get_photo
+from .acl import get_photo, get_weather, get_coordinates
 
 
 @require_http_methods(["GET", "POST"])
@@ -82,12 +82,23 @@ def api_show_conference(request, id):
     }
     """
     if request.method == "GET":
-        conference = Conference.objects.get(id=id)
-        return JsonResponse(
-            conference,
-            encoder=ConferenceDetailEncoder,
-            safe=False,
-        )
+        try:
+            conference = Conference.objects.get(id=id)
+            coordinates = get_coordinates(
+                conference.location.city, conference.location.state.name
+            )
+            weather = get_weather(
+                coordinates["latitude"], coordinates["longitude"]
+            )
+            return JsonResponse(
+                {"conference": conference, "weather": weather},
+                encoder=ConferenceDetailEncoder,
+                safe=False,
+            )
+        except Conference.DoesNotExist:
+            return JsonResponse(
+                {"message": "Conference does not exist"},
+            )
     elif request.method == "DELETE":
         count, _ = Conference.objects.filter(id=id).delete()
         return JsonResponse({"deleted": count > 0})
