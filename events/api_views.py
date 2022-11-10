@@ -8,6 +8,7 @@ from .encoders import (
     LocationDetailEncoder,
 )
 import json
+from .acl import get_photo
 
 
 @require_http_methods(["GET", "POST"])
@@ -104,7 +105,7 @@ def api_show_conference(request, id):
         Conference.objects.filter(id=id).update(**content)
         conference = Conference.objects.get(id=id)
         return JsonResponse(
-            conference,
+            {"conference": conference},
             encoder=ConferenceDetailEncoder,
             safe=False,
         )
@@ -146,6 +147,8 @@ def api_list_locations(request):
                 {"message": "Invalid state abbreviation"},
                 status=400,
             )
+        photo = get_photo(content["city"], content["state"])
+        content["picture_url"] = photo
         location = Location.objects.create(**content)
         return JsonResponse(
             location,
