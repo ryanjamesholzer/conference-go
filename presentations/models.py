@@ -53,6 +53,13 @@ class Presentation(models.Model):
     def __str__(self):
         return self.title
 
+    @classmethod
+    def create(cls, **kwargs):
+        kwargs["status"] = Status.objects.get(name="SUBMITTED")
+        presentation = cls(**kwargs)
+        presentation.save()
+        return presentation
+
     def approve(self):
         status = Status.objects.get(name="APPROVED")
         self.status = status
