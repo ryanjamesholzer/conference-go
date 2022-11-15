@@ -1,13 +1,15 @@
 from django.http import JsonResponse
-from .models import Attendee
-from .encoders import AttendeeListEncoder, AttendeeDetailEncoder
+from .models import Attendee, ConferenceVO
+from .encoders import (
+    AttendeeListEncoder,
+    AttendeeDetailEncoder,
+)
 from django.views.decorators.http import require_http_methods
 import json
-from events.models import Conference
 
 
 @require_http_methods(["GET", "POST"])
-def api_list_attendees(request, conference_id):
+def api_list_attendees(request, conference_vo_id=None):
     """
     Lists the attendees names and the link to the attendee
     for the specified conference id.
@@ -28,7 +30,7 @@ def api_list_attendees(request, conference_id):
     }
     """
     if request.method == "GET":
-        attendees = Attendee.objects.filter(conference=conference_id)
+        attendees = Attendee.objects.filter(conference=conference_vo_id)
         return JsonResponse(
             {"attendees": attendees},
             encoder=AttendeeListEncoder,
@@ -36,9 +38,10 @@ def api_list_attendees(request, conference_id):
     else:
         content = json.loads(request.body)
         try:
-            conference = Conference.objects.get(id=conference_id)
+            conference_href = f"/api/conferences/{conference_vo_id}/"
+            conference = ConferenceVO.objects.get(import_href=conference_href)
             content["conference"] = conference
-        except Conference.DoesNotExist:
+        except ConferenceVO.DoesNotExist:
             return JsonResponse(
                 {"message": "Invalid conference id"},
                 status=400,
