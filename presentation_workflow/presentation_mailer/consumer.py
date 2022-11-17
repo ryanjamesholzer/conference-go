@@ -68,4 +68,4 @@ while True:
         channel.start_consuming()
     except AMQPConnectionError:
         print("Could not connect to RabbitMQ")
-        time.sleep(1)
+        time.sleep(2)

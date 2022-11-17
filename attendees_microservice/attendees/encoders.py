@@ -1,5 +1,5 @@
 from common.json import ModelEncoder
-from .models import Attendee, ConferenceVO
+from .models import Attendee, ConferenceVO, AccountVO
 
 
 class ConferenceVODetailEncoder(ModelEncoder):
@@ -24,3 +24,10 @@ class AttendeeDetailEncoder(ModelEncoder):
     encoders = {
         "conference": ConferenceVODetailEncoder(),
     }
+
+    def get_extra_data(self, o):
+        count = len(AccountVO.objects.filter(email=o.email))
+        if count > 0:
+            return {"has_account": True}
+        else:
+            return {"has_account": False}
